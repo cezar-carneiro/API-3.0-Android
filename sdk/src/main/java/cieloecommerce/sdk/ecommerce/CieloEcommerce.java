@@ -1,5 +1,7 @@
 package cieloecommerce.sdk.ecommerce;
 
+import org.apache.http.client.HttpClient;
+
 import java.util.concurrent.ExecutionException;
 
 import cieloecommerce.sdk.Merchant;
@@ -15,6 +17,7 @@ import cieloecommerce.sdk.ecommerce.request.UpdateSaleRequest;
 public class CieloEcommerce {
     private final Merchant merchant;
     private final Environment environment;
+    private HttpClient httpClient;
 
     /**
      * Create an instance of CieloEcommerce choosing the environment where the requests will be send
@@ -36,6 +39,10 @@ public class CieloEcommerce {
         this(merchant, Environment.PRODUCTION);
     }
 
+    public void setHttpClient(HttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
+
     /**
      * Send the Sale to be created and return the Sale with tid and the status returned by Cielo.
      *
@@ -47,6 +54,8 @@ public class CieloEcommerce {
      */
     public Sale createSale(Sale sale) throws ExecutionException, InterruptedException, CieloRequestException {
         CreateSaleRequest createSaleRequest = new CreateSaleRequest(merchant, environment);
+
+        createSaleRequest.setHttpClient(httpClient);
 
         sale = createSaleRequest.execute(sale).get();
 
@@ -66,6 +75,8 @@ public class CieloEcommerce {
      */
     public Sale querySale(String paymentId) throws ExecutionException, InterruptedException, CieloRequestException {
         QuerySaleRequest querySaleRequest = new QuerySaleRequest(merchant, environment);
+
+        querySaleRequest.setHttpClient(httpClient);
 
         Sale sale = querySaleRequest.execute(paymentId).get();
 
@@ -87,6 +98,7 @@ public class CieloEcommerce {
     public Sale cancelSale(String paymentId, Integer amount) throws ExecutionException, InterruptedException, CieloRequestException {
         UpdateSaleRequest updateSaleRequest = new UpdateSaleRequest("void", merchant, environment);
 
+        updateSaleRequest.setHttpClient(httpClient);
         updateSaleRequest.setAmount(amount);
 
         Sale sale = updateSaleRequest.execute(paymentId).get();
@@ -123,6 +135,7 @@ public class CieloEcommerce {
     public Sale captureSale(String paymentId, Integer amount, Integer serviceTaxAmount) throws ExecutionException, InterruptedException, CieloRequestException {
         UpdateSaleRequest updateSaleRequest = new UpdateSaleRequest("capture", merchant, environment);
 
+        updateSaleRequest.setHttpClient(httpClient);
         updateSaleRequest.setAmount(amount);
         updateSaleRequest.setServiceTaxAmount(serviceTaxAmount);
 

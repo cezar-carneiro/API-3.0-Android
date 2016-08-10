@@ -32,6 +32,7 @@ public abstract class AbstractSaleRequest<T> extends AsyncTask<T, Void, Sale> {
     final Environment environment;
     private final Merchant merchant;
     private CieloRequestException exception;
+    private HttpClient httpClient;
 
     AbstractSaleRequest(Merchant merchant, Environment environment) {
         this.merchant = merchant;
@@ -56,6 +57,10 @@ public abstract class AbstractSaleRequest<T> extends AsyncTask<T, Void, Sale> {
         return exception;
     }
 
+    public void setHttpClient(HttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
+
     /**
      * Send the HTTP request to Cielo with the mandatory HTTP Headers set
      *
@@ -64,7 +69,9 @@ public abstract class AbstractSaleRequest<T> extends AsyncTask<T, Void, Sale> {
      * @throws IOException yeah, deal with it
      */
     HttpResponse sendRequest(HttpUriRequest request) throws IOException {
-        HttpClient client = new DefaultHttpClient();
+        if (httpClient == null) {
+            httpClient = new DefaultHttpClient();
+        }
 
         request.addHeader("Accept", "application/json");
         request.addHeader("Accept-Encoding", "gzip");
@@ -74,7 +81,7 @@ public abstract class AbstractSaleRequest<T> extends AsyncTask<T, Void, Sale> {
         request.addHeader("MerchantKey", merchant.getKey());
         request.addHeader("RequestId", UUID.randomUUID().toString());
 
-        return client.execute(request);
+        return httpClient.execute(request);
     }
 
     /**
