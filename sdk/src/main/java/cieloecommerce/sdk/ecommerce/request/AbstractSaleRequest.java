@@ -5,19 +5,15 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.DefaultHttpClient;
-
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.UUID;
-import java.util.zip.GZIPInputStream;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import cieloecommerce.sdk.Environment;
 import cieloecommerce.sdk.Merchant;
@@ -32,7 +28,6 @@ public abstract class AbstractSaleRequest<T> extends AsyncTask<T, Void, Sale> {
     final Environment environment;
     private final Merchant merchant;
     private CieloRequestException exception;
-    private HttpClient httpClient;
 
     AbstractSaleRequest(Merchant merchant, Environment environment) {
         this.merchant = merchant;
@@ -57,59 +52,80 @@ public abstract class AbstractSaleRequest<T> extends AsyncTask<T, Void, Sale> {
         return exception;
     }
 
-    public void setHttpClient(HttpClient httpClient) {
-        this.httpClient = httpClient;
+    /**
+     * Send the HTTP request to Cielo with the mandatory HTTP Headers set
+     *
+     * @param method The POST, PUT, GET request method
+     * @param url    The endpoint em resource path
+     * @return the HTTP response returned by Cielo
+     * @throws IOException yeah, deal with it
+     */
+    Sale sendRequest(String method, URL url) throws IOException {
+        return sendRequest(method, url, null);
     }
 
     /**
      * Send the HTTP request to Cielo with the mandatory HTTP Headers set
      *
-     * @param request The POST, PUT, GET request and its content is defined by the derivations
+     * @param method The POST, PUT, GET request method
+     * @param url    The endpoint em resource path
+     * @param body   The request body, if any
      * @return the HTTP response returned by Cielo
      * @throws IOException yeah, deal with it
      */
-    HttpResponse sendRequest(HttpUriRequest request) throws IOException {
-        if (httpClient == null) {
-            httpClient = new DefaultHttpClient();
+    Sale sendRequest(String method, URL url, String body) throws IOException {
+        Log.d("Cielo SDK", "HTTP Method: " + method);
+        Log.d("Cielo SDK", "URL: " + url.toString());
+
+        HttpsURLConnection connection = null;
+        connection = (HttpsURLConnection) url.openConnection();
+
+        connection.setRequestMethod(method);
+
+        connection.setRequestProperty("Accept", "application/json");
+        connection.setRequestProperty("Accept-Encoding", "gzip");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty("User-Agent", "CieloEcommerce/3.0 Android SDK");
+        connection.setRequestProperty("MerchantId", merchant.getId());
+        connection.setRequestProperty("MerchantKey", merchant.getKey());
+        connection.setRequestProperty("RequestId", UUID.randomUUID().toString());
+
+        connection.setDoInput(true);
+        connection.setUseCaches(false);
+
+        if (body != null) {
+            Log.d("Cielo SDK", "Request Body: " + body);
+
+            connection.setDoOutput(true);
+
+            DataOutputStream dataOutputStream = new DataOutputStream(connection.getOutputStream());
+
+            dataOutputStream.writeBytes(body);
+            dataOutputStream.flush();
+            dataOutputStream.close();
         }
 
-        request.addHeader("Accept", "application/json");
-        request.addHeader("Accept-Encoding", "gzip");
-        request.addHeader("Content-Type", "application/json");
-        request.addHeader("User-Agent", "CieloEcommerce/3.0 Android SDK");
-        request.addHeader("MerchantId", merchant.getId());
-        request.addHeader("MerchantKey", merchant.getKey());
-        request.addHeader("RequestId", UUID.randomUUID().toString());
+        int statusCode = connection.getResponseCode();
 
-        return httpClient.execute(request);
-    }
+        InputStream inputStream = connection.getInputStream();
 
-    /**
-     * Read the response body sent by Cielo
-     *
-     * @param response HttpResponse by Cielo, with headers, status code, etc.
-     * @return An instance of Sale with the response entity sent by Cielo.
-     * @throws IOException yeah, deal with it
-     */
-    Sale readResponse(HttpResponse response) throws IOException {
-        HttpEntity responseEntity = response.getEntity();
-        InputStream responseEntityContent = responseEntity.getContent();
-
-        Header contentEncoding = response.getFirstHeader("Content-Encoding");
-
-        if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-            responseEntityContent = new GZIPInputStream(responseEntityContent);
-        }
-
-        BufferedReader responseReader = new BufferedReader(new InputStreamReader(responseEntityContent));
+        BufferedReader responseReader = new BufferedReader(new InputStreamReader(inputStream));
         StringBuilder responseBuilder = new StringBuilder();
         String line;
+        String responseBody;
 
         while ((line = responseReader.readLine()) != null) {
             responseBuilder.append(line);
         }
 
-        return parseResponse(response.getStatusLine().getStatusCode(), responseBuilder.toString());
+        responseReader.close();
+        connection.disconnect();
+
+        responseBody = responseBuilder.toString();
+
+        Log.d("Cielo SDK", "Response Body: " + responseBody);
+
+        return parseResponse(statusCode, responseBody);
     }
 
     /**
@@ -132,7 +148,7 @@ public abstract class AbstractSaleRequest<T> extends AsyncTask<T, Void, Sale> {
                 CieloError[] errors = gson.fromJson(responseBody, CieloError[].class);
 
                 for (CieloError error : errors) {
-                    Log.v("Cielo Error [" + error.getCode() + "]", error.getMessage());
+                    Log.v("Cielo SDK", "Error [" + error.getCode() + "] " + error.getMessage());
 
                     exception = new CieloRequestException(error.getMessage(), error, exception);
                 }
@@ -142,7 +158,7 @@ public abstract class AbstractSaleRequest<T> extends AsyncTask<T, Void, Sale> {
                 exception = new CieloRequestException("Not found", new CieloError(404, "Not found"), exception);
                 break;
             default:
-                Log.d("Cielo", "Unknown status: " + statusCode);
+                Log.d("Cielo SDK", "Unknown HTTP Status " + statusCode);
         }
 
         return sale;

@@ -3,10 +3,8 @@ package cieloecommerce.sdk.ecommerce.request;
 import android.net.Uri;
 import android.util.Log;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPut;
-
 import java.io.IOException;
+import java.net.URL;
 
 import cieloecommerce.sdk.Environment;
 import cieloecommerce.sdk.Merchant;
@@ -44,10 +42,9 @@ public class UpdateSaleRequest extends AbstractSaleRequest<String> {
                 uri.appendQueryParameter("serviceTaxAmount", serviceTaxAmount.toString());
             }
 
-            HttpPut request = new HttpPut(uri.build().toString());
-            HttpResponse response = sendRequest(request);
+            URL url = new URL(uri.build().toString());
 
-            sale = readResponse(response);
+            sale = sendRequest("PUT", url);
         } catch (IOException e) {
             Log.e("Cielo SDK", e.getLocalizedMessage(), e);
         }

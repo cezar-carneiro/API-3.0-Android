@@ -4,11 +4,8 @@ import android.util.Log;
 
 import com.google.gson.GsonBuilder;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-
 import java.io.IOException;
+import java.net.URL;
 
 import cieloecommerce.sdk.Environment;
 import cieloecommerce.sdk.Merchant;
@@ -27,14 +24,9 @@ public class CreateSaleRequest extends AbstractSaleRequest<Sale> {
         Sale sale = null;
 
         try {
-            String url = environment.getApiUrl() + "1/sales/";
-            HttpPost request = new HttpPost(url);
+            URL url = new URL(environment.getApiUrl() + "1/sales/");
 
-            request.setEntity(new StringEntity(new GsonBuilder().create().toJson(params[0])));
-
-            HttpResponse response = sendRequest(request);
-
-            sale = readResponse(response);
+            sale = sendRequest("POST", url, new GsonBuilder().create().toJson(params[0]));
         } catch (IOException e) {
             Log.e("Cielo SDK", e.getLocalizedMessage(), e);
         }

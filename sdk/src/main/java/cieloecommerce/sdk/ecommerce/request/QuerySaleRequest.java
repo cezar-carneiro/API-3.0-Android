@@ -2,10 +2,8 @@ package cieloecommerce.sdk.ecommerce.request;
 
 import android.util.Log;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-
 import java.io.IOException;
+import java.net.URL;
 
 import cieloecommerce.sdk.Environment;
 import cieloecommerce.sdk.Merchant;
@@ -25,12 +23,9 @@ public class QuerySaleRequest extends AbstractSaleRequest<String> {
         String paymentId = params[0];
 
         try {
-            String url = environment.getApiUrl() + "1/sales/" + paymentId;
+            URL url = new URL(environment.getApiUrl() + "1/sales/" + paymentId);
 
-            HttpGet request = new HttpGet(url);
-            HttpResponse response = sendRequest(request);
-
-            sale = readResponse(response);
+            sale = sendRequest("GET", url);
         } catch (IOException e) {
             Log.e("Cielo SDK", e.getLocalizedMessage(), e);
         }
