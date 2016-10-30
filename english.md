@@ -104,4 +104,4 @@ try {
 
 ## Manual
 
-For more information about integration with Cielo API 3.0, check the manual at: [Integração API 3.0](developercielo.github.io/Webservice-3.0)
+For more information about integration with Cielo API 3.0, check the manual at: [Integração API 3.0](https://developercielo.github.io/Webservice-3.0/)
