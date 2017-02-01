@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -18,6 +20,7 @@ import javax.net.ssl.HttpsURLConnection;
 import cieloecommerce.sdk.Environment;
 import cieloecommerce.sdk.Merchant;
 import cieloecommerce.sdk.ecommerce.Sale;
+import cieloecommerce.sdk.ecommerce.request.TLSSocketFactory;
 
 /**
  * Abstraction to reuse most of the code that send and receive the HTTP messages.
@@ -28,6 +31,22 @@ public abstract class AbstractSaleRequest<T> extends AsyncTask<T, Void, Sale> {
     final Environment environment;
     private final Merchant merchant;
     private CieloRequestException exception;
+
+    static {
+        /* We need to do this in order to enable TLS support for some Android versions.
+         * TLS support has been enabled by default only after API level 20+.
+         * Support exists after API level 16+.
+         */
+        try {
+            if (android.os.Build.VERSION.SDK_INT < 20) {
+                HttpsURLConnection.setDefaultSSLSocketFactory(new TLSSocketFactory());
+            }
+        } catch (KeyManagementException e) {
+            Log.e("Cielo SDK", "Error enabling TLS support", e);
+        } catch (NoSuchAlgorithmException e) {
+            Log.e("Cielo SDK", "Error enabling TLS support", e);
+        }
+    }
 
     AbstractSaleRequest(Merchant merchant, Environment environment) {
         this.merchant = merchant;
