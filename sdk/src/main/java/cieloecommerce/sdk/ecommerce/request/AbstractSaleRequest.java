@@ -20,7 +20,6 @@ import javax.net.ssl.HttpsURLConnection;
 import cieloecommerce.sdk.Environment;
 import cieloecommerce.sdk.Merchant;
 import cieloecommerce.sdk.ecommerce.Sale;
-import cieloecommerce.sdk.ecommerce.request.TLSSocketFactory;
 
 /**
  * Abstraction to reuse most of the code that send and receive the HTTP messages.
@@ -95,7 +94,6 @@ public abstract class AbstractSaleRequest<T> extends AsyncTask<T, Void, Sale> {
     Sale sendRequest(String method, URL url, String body) throws IOException {
         Log.d("Cielo SDK", "HTTP Method: " + method);
         Log.d("Cielo SDK", "URL: " + url.toString());
-
         HttpsURLConnection connection = null;
         connection = (HttpsURLConnection) url.openConnection();
 
@@ -126,7 +124,15 @@ public abstract class AbstractSaleRequest<T> extends AsyncTask<T, Void, Sale> {
 
         int statusCode = connection.getResponseCode();
 
-        InputStream inputStream = connection.getInputStream();
+        /* First, let's check if the request was successful or not.
+        * If the Error Stream is null, then the request was successful.
+        * If the Error Stream is not null, we CANNOT call the normal Stream.
+        */
+        InputStream inputStream = connection.getErrorStream();
+        if (inputStream == null) {
+            // Since the Error Stream is null, it's safe to use the normal Stream
+            inputStream = connection.getInputStream();
+        }
 
         BufferedReader responseReader = new BufferedReader(new InputStreamReader(inputStream));
         StringBuilder responseBuilder = new StringBuilder();
