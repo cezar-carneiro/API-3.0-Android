@@ -23,7 +23,7 @@ public class QuerySaleRequest extends AbstractSaleRequest<String> {
         String paymentId = params[0];
 
         try {
-            URL url = new URL(environment.getApiUrl() + "1/sales/" + paymentId);
+            URL url = new URL(environment.getApiQueryURL() + "1/sales/" + paymentId);
 
             sale = sendRequest("GET", url);
         } catch (IOException e) {
