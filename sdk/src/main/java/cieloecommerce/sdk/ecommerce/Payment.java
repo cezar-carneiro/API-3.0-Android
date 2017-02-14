@@ -54,7 +54,7 @@ public class Payment {
     @SerializedName("Status")
     private Integer status;
     @SerializedName("Links")
-    private Object links[];
+    private Link links[];
     @SerializedName("ExtraDataCollection")
     private Object extraDataCollection[];
     @SerializedName("ExpirationDate")
@@ -345,7 +345,7 @@ public class Payment {
         return extraDataCollection;
     }
 
-    public Object[] getLinks() {
+    public Link[] getLinks() {
         return links;
     }
 
