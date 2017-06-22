@@ -3,11 +3,7 @@ package cieloecommerce.sdk.ecommerce;
 import java.util.concurrent.ExecutionException;
 
 import cieloecommerce.sdk.Merchant;
-import cieloecommerce.sdk.ecommerce.request.AbstractSaleRequest;
-import cieloecommerce.sdk.ecommerce.request.CieloRequestException;
-import cieloecommerce.sdk.ecommerce.request.CreateSaleRequest;
-import cieloecommerce.sdk.ecommerce.request.QuerySaleRequest;
-import cieloecommerce.sdk.ecommerce.request.UpdateSaleRequest;
+import cieloecommerce.sdk.ecommerce.request.*;
 
 /**
  * The Cielo Ecommerce SDK front-end;
@@ -84,12 +80,12 @@ public class CieloEcommerce {
      * @throws CieloRequestException if anything gets wrong.
      * @see <a href="https://developercielo.github.io/Webservice-3.0/english.html#error-codes">Error Codes</a>
      */
-    public Sale cancelSale(String paymentId, Integer amount) throws ExecutionException, InterruptedException, CieloRequestException {
-        UpdateSaleRequest updateSaleRequest = new UpdateSaleRequest("void", merchant, environment);
+    public UpdateSaleResponse cancelSale(String paymentId, Integer amount) throws ExecutionException, InterruptedException, CieloRequestException {
+        UpdateSaleRequest updateSaleRequest = new UpdateSaleRequest(UpdateSaleRequest.UpdateType.VOID, merchant, environment);
 
         updateSaleRequest.setAmount(amount);
 
-        Sale sale = updateSaleRequest.execute(paymentId).get();
+        UpdateSaleResponse sale = updateSaleRequest.execute(paymentId).get();
 
         verifyThrownException(updateSaleRequest);
 
@@ -105,7 +101,7 @@ public class CieloEcommerce {
      * @throws CieloRequestException if anything gets wrong.
      * @see <a href="https://developercielo.github.io/Webservice-3.0/english.html#error-codes">Error Codes</a>
      */
-    public Sale cancelSale(String paymentId) throws ExecutionException, InterruptedException, CieloRequestException {
+    public UpdateSaleResponse cancelSale(String paymentId) throws ExecutionException, InterruptedException, CieloRequestException {
         return cancelSale(paymentId, null);
     }
 
@@ -120,13 +116,13 @@ public class CieloEcommerce {
      * @throws CieloRequestException if anything gets wrong.
      * @see <a href="https://developercielo.github.io/Webservice-3.0/english.html#error-codes">Error Codes</a>
      */
-    public Sale captureSale(String paymentId, Integer amount, Integer serviceTaxAmount) throws ExecutionException, InterruptedException, CieloRequestException {
-        UpdateSaleRequest updateSaleRequest = new UpdateSaleRequest("capture", merchant, environment);
+    public UpdateSaleResponse captureSale(String paymentId, Integer amount, Integer serviceTaxAmount) throws ExecutionException, InterruptedException, CieloRequestException {
+        UpdateSaleRequest updateSaleRequest = new UpdateSaleRequest(UpdateSaleRequest.UpdateType.CAPTURE, merchant, environment);
 
         updateSaleRequest.setAmount(amount);
         updateSaleRequest.setServiceTaxAmount(serviceTaxAmount);
 
-        Sale sale = updateSaleRequest.execute(paymentId).get();
+        UpdateSaleResponse sale = updateSaleRequest.execute(paymentId).get();
 
         verifyThrownException(updateSaleRequest);
 
@@ -143,7 +139,7 @@ public class CieloEcommerce {
      * @throws CieloRequestException if anything gets wrong.
      * @see <a href="https://developercielo.github.io/Webservice-3.0/english.html#error-codes">Error Codes</a>
      */
-    public Sale captureSale(String paymentId, Integer amount) throws ExecutionException, InterruptedException, CieloRequestException {
+    public UpdateSaleResponse captureSale(String paymentId, Integer amount) throws ExecutionException, InterruptedException, CieloRequestException {
         return captureSale(paymentId, amount, null);
     }
 
@@ -156,7 +152,7 @@ public class CieloEcommerce {
      * @throws CieloRequestException if anything gets wrong.
      * @see <a href="https://developercielo.github.io/Webservice-3.0/english.html#error-codes">Error Codes</a>
      */
-    public Sale captureSale(String paymentId) throws ExecutionException, InterruptedException, CieloRequestException {
+    public UpdateSaleResponse captureSale(String paymentId) throws ExecutionException, InterruptedException, CieloRequestException {
         return captureSale(paymentId, null, null);
     }
 

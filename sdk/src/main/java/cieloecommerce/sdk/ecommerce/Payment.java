@@ -18,7 +18,9 @@ public class Payment {
     @SerializedName("RecurrentPayment")
     private RecurrentPayment recurrentPayment;
     @SerializedName("CreditCard")
-    private CreditCard creditCard;
+    private Card creditCard;
+    @SerializedName("DebitCard")
+    private Card debitCard;
     @SerializedName("Tid")
     private String tid;
     @SerializedName("ProofOfSale")
@@ -29,6 +31,8 @@ public class Payment {
     private String softDescriptor = "";
     @SerializedName("ReturnUrl")
     private String returnUrl;
+    @SerializedName("AuthenticationUrl")
+    private String authenticationUrl;
     @SerializedName("Provider")
     private Provider provider;
     @SerializedName("PaymentId")
@@ -79,11 +83,18 @@ public class Payment {
         this(amount, 1);
     }
 
-    public CreditCard creditCard(String securityCode, String brand) {
+    public Card creditCard(String securityCode, String brand) {
         setType(Type.CreditCard);
-        setCreditCard(new CreditCard(securityCode, brand));
+        setCreditCard(new Card(securityCode, brand));
 
         return getCreditCard();
+    }
+
+    public Card debitCard(String securityCode, String brand) {
+        setType(Type.DebitCard);
+        setDebitCard(new Card(securityCode, brand));
+
+        return getDebitCard();
     }
 
     public RecurrentPayment recurrentPayment(boolean authorizeNow) {
@@ -145,12 +156,25 @@ public class Payment {
         return this;
     }
 
-    public CreditCard getCreditCard() {
+    public Card getCard(){
+        return type == Type.CreditCard ? getCreditCard() : type == Type.DebitCard ? getDebitCard() : null;
+    }
+
+    public Card getCreditCard() {
         return creditCard;
     }
 
-    public Payment setCreditCard(CreditCard creditCard) {
+    public Payment setCreditCard(Card creditCard) {
         this.creditCard = creditCard;
+        return this;
+    }
+
+    public Card getDebitCard() {
+        return debitCard;
+    }
+
+    public Payment setDebitCard(Card debitCard) {
+        this.debitCard = debitCard;
         return this;
     }
 
@@ -259,6 +283,15 @@ public class Payment {
 
     public Payment setReturnUrl(String returnUrl) {
         this.returnUrl = returnUrl;
+        return this;
+    }
+
+    public String getAuthenticationUrl() {
+        return authenticationUrl;
+    }
+
+    public Payment setAuthenticationUrl(String authenticationUrl) {
+        this.authenticationUrl = authenticationUrl;
         return this;
     }
 

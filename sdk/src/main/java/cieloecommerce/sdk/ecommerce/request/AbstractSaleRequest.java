@@ -19,17 +19,18 @@ import javax.net.ssl.HttpsURLConnection;
 
 import cieloecommerce.sdk.Environment;
 import cieloecommerce.sdk.Merchant;
-import cieloecommerce.sdk.ecommerce.Sale;
 
 /**
  * Abstraction to reuse most of the code that send and receive the HTTP messages.
  *
- * @param <T> the AsyncTask expects 3 params and we can only anticipate 2 of them.
+ * @param <P> the AsyncTask expects 3 params and we can only anticipate 2 of them.
  */
-public abstract class AbstractSaleRequest<T> extends AsyncTask<T, Void, Sale> {
+public abstract class AbstractSaleRequest<P, R> extends AsyncTask<P, Void, R> {
     final Environment environment;
     private final Merchant merchant;
     private CieloRequestException exception;
+
+    protected Class<R> clazz;
 
     static {
         /* We need to do this in order to enable TLS support for some Android versions.
@@ -47,9 +48,10 @@ public abstract class AbstractSaleRequest<T> extends AsyncTask<T, Void, Sale> {
         }
     }
 
-    AbstractSaleRequest(Merchant merchant, Environment environment) {
+    protected AbstractSaleRequest(Merchant merchant, Environment environment, Class<R> responseClass) {
         this.merchant = merchant;
         this.environment = environment;
+        this.clazz = responseClass;
     }
 
     /**
@@ -78,7 +80,7 @@ public abstract class AbstractSaleRequest<T> extends AsyncTask<T, Void, Sale> {
      * @return the HTTP response returned by Cielo
      * @throws IOException yeah, deal with it
      */
-    Sale sendRequest(String method, URL url) throws IOException {
+    R sendRequest(String method, URL url) throws IOException {
         return sendRequest(method, url, null);
     }
 
@@ -91,7 +93,7 @@ public abstract class AbstractSaleRequest<T> extends AsyncTask<T, Void, Sale> {
      * @return the HTTP response returned by Cielo
      * @throws IOException yeah, deal with it
      */
-    Sale sendRequest(String method, URL url, String body) throws IOException {
+    R sendRequest(String method, URL url, String body) throws IOException {
         Log.d("Cielo SDK", "HTTP Method: " + method);
         Log.d("Cielo SDK", "URL: " + url.toString());
         HttpsURLConnection connection = null;
@@ -160,14 +162,14 @@ public abstract class AbstractSaleRequest<T> extends AsyncTask<T, Void, Sale> {
      * @param responseBody The response sent by Cielo
      * @return An instance of Sale or null
      */
-    private Sale parseResponse(int statusCode, String responseBody) {
-        Sale sale = null;
+    private R parseResponse(int statusCode, String responseBody) {
+        R sale = null;
         Gson gson = new Gson();
 
         switch (statusCode) {
             case 200:
             case 201:
-                sale = gson.fromJson(responseBody, Sale.class);
+                sale = gson.fromJson(responseBody, clazz);
                 break;
             case 400:
                 CieloError[] errors = gson.fromJson(responseBody, CieloError[].class);

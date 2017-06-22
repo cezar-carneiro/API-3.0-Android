@@ -2,31 +2,29 @@ package cieloecommerce.sdk.ecommerce.request;
 
 import android.net.Uri;
 import android.util.Log;
+import cieloecommerce.sdk.Environment;
+import cieloecommerce.sdk.Merchant;
 
 import java.io.IOException;
 import java.net.URL;
 
-import cieloecommerce.sdk.Environment;
-import cieloecommerce.sdk.Merchant;
-import cieloecommerce.sdk.ecommerce.Sale;
-
 /**
  * Capture or cancel a Sale
  */
-public class UpdateSaleRequest extends AbstractSaleRequest<String> {
+public class UpdateSaleRequest extends AbstractSaleRequest<String, UpdateSaleResponse> {
     private final String type;
     private Integer amount;
     private Integer serviceTaxAmount;
 
     public UpdateSaleRequest(String type, Merchant merchant, Environment environment) {
-        super(merchant, environment);
+        super(merchant, environment, UpdateSaleResponse.class);
 
         this.type = type;
     }
 
     @Override
-    protected Sale doInBackground(String... params) {
-        Sale sale = null;
+    protected UpdateSaleResponse doInBackground(String... params) {
+        UpdateSaleResponse sale = null;
         String paymentId = params[0];
 
         try {
@@ -58,5 +56,12 @@ public class UpdateSaleRequest extends AbstractSaleRequest<String> {
 
     public void setServiceTaxAmount(Integer serviceTaxAmount) {
         this.serviceTaxAmount = serviceTaxAmount;
+    }
+
+    public static class UpdateType {
+
+        public static final String VOID = "void";
+        public static final String CAPTURE = "capture";
+
     }
 }

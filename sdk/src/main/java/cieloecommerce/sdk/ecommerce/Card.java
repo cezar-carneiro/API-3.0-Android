@@ -2,7 +2,7 @@ package cieloecommerce.sdk.ecommerce;
 
 import com.google.gson.annotations.SerializedName;
 
-public class CreditCard {
+public class Card {
     @SerializedName("CardNumber")
     private String cardNumber;
 
@@ -24,7 +24,7 @@ public class CreditCard {
     @SerializedName("CardToken")
     private String cardToken;
 
-    public CreditCard(String securityCode, String brand) {
+    public Card(String securityCode, String brand) {
         setSecurityCode(securityCode);
         setBrand(brand);
     }
@@ -33,7 +33,7 @@ public class CreditCard {
         return brand;
     }
 
-    public CreditCard setBrand(String brand) {
+    public Card setBrand(String brand) {
         this.brand = brand;
         return this;
     }
@@ -42,7 +42,7 @@ public class CreditCard {
         return cardNumber;
     }
 
-    public CreditCard setCardNumber(String cardNumber) {
+    public Card setCardNumber(String cardNumber) {
         this.cardNumber = cardNumber;
         return this;
     }
@@ -51,7 +51,7 @@ public class CreditCard {
         return cardToken;
     }
 
-    public CreditCard setCardToken(String cardToken) {
+    public Card setCardToken(String cardToken) {
         this.cardToken = cardToken;
         return this;
     }
@@ -60,7 +60,7 @@ public class CreditCard {
         return expirationDate;
     }
 
-    public CreditCard setExpirationDate(String expirationDate) {
+    public Card setExpirationDate(String expirationDate) {
         this.expirationDate = expirationDate;
         return this;
     }
@@ -69,7 +69,7 @@ public class CreditCard {
         return holder;
     }
 
-    public CreditCard setHolder(String holder) {
+    public Card setHolder(String holder) {
         this.holder = holder;
         return this;
     }
@@ -78,7 +78,7 @@ public class CreditCard {
         return saveCard;
     }
 
-    public CreditCard setSaveCard(boolean saveCard) {
+    public Card setSaveCard(boolean saveCard) {
         this.saveCard = saveCard;
         return this;
     }
@@ -87,7 +87,7 @@ public class CreditCard {
         return securityCode;
     }
 
-    public CreditCard setSecurityCode(String securityCode) {
+    public Card setSecurityCode(String securityCode) {
         this.securityCode = securityCode;
         return this;
     }
