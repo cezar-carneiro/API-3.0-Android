@@ -12,9 +12,9 @@ import cieloecommerce.sdk.ecommerce.Sale;
 /**
  * Query a Sale by it's paymentId
  */
-public class QuerySaleRequest extends AbstractSaleRequest<String> {
+public class QuerySaleRequest extends AbstractSaleRequest<String, Sale> {
     public QuerySaleRequest(Merchant merchant, Environment environment) {
-        super(merchant, environment);
+        super(merchant, environment, Sale.class);
     }
 
     @Override

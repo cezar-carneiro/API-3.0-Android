@@ -14,9 +14,9 @@ import cieloecommerce.sdk.ecommerce.Sale;
 /**
  * Create any kind of sale
  */
-public class CreateSaleRequest extends AbstractSaleRequest<Sale> {
+public class CreateSaleRequest extends AbstractSaleRequest<Sale, Sale> {
     public CreateSaleRequest(Merchant merchant, Environment environment) {
-        super(merchant, environment);
+        super(merchant, environment, Sale.class);
     }
 
     @Override
